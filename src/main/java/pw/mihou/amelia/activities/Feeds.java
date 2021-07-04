@@ -3,6 +3,7 @@ package pw.mihou.amelia.activities;
 import pw.mihou.amelia.Amelia;
 import pw.mihou.amelia.connections.AmeliaServer;
 import pw.mihou.amelia.db.FeedManager;
+import pw.mihou.amelia.fault.FaultTolerance;
 import pw.mihou.amelia.io.ReadRSS;
 import pw.mihou.amelia.io.Scheduler;
 import pw.mihou.amelia.payloads.AmeliaPayload;
@@ -25,7 +26,10 @@ public class Feeds {
                                     AmeliaServer.sendPayload(new AmeliaPayload(item, feedModel.setPublishedDate(date)), "feed");
                                     Amelia.log.info("All {} nodes were notified for feed [{}].", AmeliaServer.connections.size(), feedModel.getUnique());
                                 }
-                            }), () -> Amelia.log.error("We couldn't find any results for {} from {}.", feedModel.getName(), feedModel.getFeedURL())), bucket.addAndGet(2), TimeUnit.SECONDS))).exceptionally(throwable -> {
+                            }), () -> {
+                        FaultTolerance.addFault(feedModel.getUnique());
+                        Amelia.log.error("We couldn't find any results for {} from {}.", feedModel.getName(), feedModel.getFeedURL());
+                    }), bucket.addAndGet(2), TimeUnit.SECONDS))).exceptionally(throwable -> {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }

@@ -30,4 +30,8 @@ public class FeedManager {
         });
     }
 
+    public static void remove(long unique){
+        db.deleteOne(Filters.eq("unique", unique));
+    }
+
 }

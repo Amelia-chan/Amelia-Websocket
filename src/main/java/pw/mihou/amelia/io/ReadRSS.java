@@ -21,9 +21,15 @@ public class ReadRSS {
         try {
             return reader.read(url).findFirst().map(ItemWrapper::new);
         } catch (IOException exception) {
-            Amelia.log.error("Unable to connect to {}: {}", url, exception.getMessage());
-            Amelia.log.info("Attempting to reconnect to {} in 0 seconds...", url);
-            return retry(url, 0);
+            try {
+                Amelia.log.error("Unable to connect to {}: {}", url, exception.getMessage());
+                Amelia.log.info("Attempting to reconnect to {} in 2 seconds...", url);
+                Thread.sleep(2 * 1000);
+                return retry(url, 1);
+            } catch(InterruptedException e) {
+                Amelia.log.error("Thread was interrupted exception while attempting to retry {} for {} bucket: {}", url, 1, e.getMessage());
+                return Optional.empty();
+            }
         }
     }
 
