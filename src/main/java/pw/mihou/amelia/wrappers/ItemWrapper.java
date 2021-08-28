@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public class ItemWrapper {
 
-    String title;
-    Date date;
-    String author;
-    String link;
-    String description;
+    private final String title;
+    private final Date date;
+    private final String author;
+    private final String link;
+    private final String description;
 
     public ItemWrapper(Item item) {
         this.title = item.getTitle().orElse("");
@@ -30,28 +30,12 @@ public class ItemWrapper {
         }).orElse(null);
     }
 
-    public Optional<Date> getPubDate() {
-        return Optional.ofNullable(date);
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getAuthor() {
-        return author;
+    public Date getPubDate() {
+        return date;
     }
 
     public boolean valid() {
         return link != null && title != null && !link.isEmpty() && !link.isBlank() && !title.isEmpty() && !title.isBlank();
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
 

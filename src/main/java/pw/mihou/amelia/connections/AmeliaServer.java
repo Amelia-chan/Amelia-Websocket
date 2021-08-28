@@ -40,8 +40,13 @@ public class AmeliaServer {
     }
 
     public static void sendPayload(Object payload, String type) {
-        connections.values().stream().filter(wsContext -> wsContext.session.isOpen()).forEach(c -> c.send(new JSONObject()
-                .put("payload", gson.toJson(payload)).put("payload_type", type).toString()));
+        connections.values()
+                .stream()
+                .filter(wsContext -> wsContext.session.isOpen())
+                .forEach(c -> c.send(new JSONObject()
+                        .put("payload", gson.toJson(payload))
+                        .put("payload_type", type)
+                        .toString()));
     }
 
     private static void startTrending() {

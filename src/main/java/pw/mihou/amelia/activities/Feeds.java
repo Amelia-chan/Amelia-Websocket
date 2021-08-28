@@ -1,5 +1,6 @@
 package pw.mihou.amelia.activities;
 
+import com.google.gson.Gson;
 import pw.mihou.amelia.Amelia;
 import pw.mihou.amelia.connections.AmeliaServer;
 import pw.mihou.amelia.db.FeedManager;
@@ -7,9 +8,12 @@ import pw.mihou.amelia.fault.FaultTolerance;
 import pw.mihou.amelia.io.ReadRSS;
 import pw.mihou.amelia.io.Scheduler;
 import pw.mihou.amelia.payloads.AmeliaPayload;
+import pw.mihou.amelia.wrappers.ItemWrapper;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Feeds {
 
@@ -17,25 +21,29 @@ public class Feeds {
         if (AmeliaServer.connections.isEmpty()) {
             Amelia.log.warn("No connections are found, feed scheduler will be delayed for until a connection is established...");
             return;
-        } else {
-            AtomicInteger bucket = new AtomicInteger(0);
-            FeedManager.request().thenAccept(feedModels -> feedModels.forEach(feedModel ->
-                    Scheduler.schedule(() -> ReadRSS.getLatest(feedModel.getFeedURL()).ifPresentOrElse(item ->
-                            item.getPubDate().ifPresent(date -> {
-                                if (date.after(feedModel.getDate())) {
-                                    AmeliaServer.sendPayload(new AmeliaPayload(item, feedModel.setPublishedDate(date)), "feed");
-                                    Amelia.log.info("All {} nodes were notified for feed [{}].", AmeliaServer.connections.size(), feedModel.getUnique());
-                                }
-                            }), () -> {
-                        FaultTolerance.addFault(feedModel.getUnique());
-                        Amelia.log.error("We couldn't find any results for {} from {}.", feedModel.getName(), feedModel.getFeedURL());
-                    }), bucket.addAndGet(2), TimeUnit.SECONDS))).exceptionally(throwable -> {
-                if (throwable != null) {
-                    throwable.printStackTrace();
-                }
-                return null;
-            });
         }
+
+        AtomicInteger bucket = new AtomicInteger(0);
+        FeedManager.request().thenAccept(feedModels -> feedModels.forEach(feedModel ->
+                Scheduler.schedule(() -> {
+                    List<ItemWrapper> feeds = ReadRSS.getLatest(feedModel.getFeedURL())
+                            .stream()
+                            .filter(itemWrapper -> itemWrapper.getPubDate().after(feedModel.getDate()))
+                            .collect(Collectors.toUnmodifiableList());
+
+                    AtomicInteger whenToUpdate = new AtomicInteger(0);
+
+                    feeds.forEach(itemWrapper -> AmeliaServer.sendPayload(new AmeliaPayload(itemWrapper,
+                            feedModel.setPublishedDate(itemWrapper.getPubDate(), whenToUpdate.incrementAndGet() == feeds.size())),
+                            "feed"));
+
+                    Amelia.log.info("Nodes were notified of a total of {} updates. [feed={}, modelId={}]", feeds.size(), feedModel.getFeedURL(), feedModel.getUnique());
+                }, bucket.addAndGet(2), TimeUnit.SECONDS))).exceptionally(throwable -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+            }
+            return null;
+        });
     }
 
 }

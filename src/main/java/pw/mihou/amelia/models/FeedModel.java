@@ -1,5 +1,7 @@
 package pw.mihou.amelia.models;
 
+import org.bson.Document;
+import pw.mihou.amelia.Amelia;
 import pw.mihou.amelia.db.FeedManager;
 
 import java.util.ArrayList;
@@ -27,49 +29,67 @@ public class FeedModel {
         this.mentions.addAll(mentions);
     }
 
-    public ArrayList<Long> getMentions() {
-        return mentions;
-    }
+    /**
+     * Sets the published date of this feed model.
+     *
+     * @param date The new date of this feed model.
+     * @param update Whether to update this field onto the database?
+     * @return A new feed model.
+     */
+    public FeedModel setPublishedDate(Date date, boolean update) {
 
-    public void subscribeRole(long id) {
-        mentions.add(id);
-    }
+        if (update) {
+            FeedManager.updateModel(unique, "date", date);
+            Amelia.log.debug("Updated published date for {}. [prevDate={}, newDate={}]", feedURL, this.date.toString(), date.toString());
+        }
 
-    public void unsubscribeRole(long id) {
-        mentions.remove(id);
-    }
-
-    public FeedModel setPublishedDate(Date date) {
-        FeedManager.updateModel(unique, "date", date);
         this.date = date;
         return this;
     }
 
+    /**
+     * Gets the unique ID of this Feed Model.
+     *
+     * @return The unique ID of the model.
+     */
     public long getUnique() {
         return unique;
     }
 
+    /**
+     * Retrieves the current date of this feed model.
+     * 
+     * @return The date of this feed model.
+     */
     public Date getDate() {
         return date;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getUser() {
-        return user;
-    }
-
-    public long getChannel() {
-        return channel;
-    }
-
-    public int getId() {
-        return id;
-    }
-
+    /**
+     * Gets the URL of this feed model.
+     *
+     * @return The URL of this feed model.
+     */
     public String getFeedURL() {
         return feedURL;
     }
+
+    /**
+     * Transforms a MongoDB-document into a Feed Model which the websocket
+     * client can understand.
+     *
+     * @param doc The document to transform.
+     * @return A new Feed Model.
+     */
+    public static FeedModel from(Document doc) {
+        return new FeedModel(doc.getLong("unique"),
+                doc.getInteger("id"),
+                doc.getString("url"),
+                doc.getLong("channel"),
+                doc.getLong("user"),
+                doc.getString("name"),
+                doc.getDate("date"),
+                doc.get("mentions", new ArrayList<>()));
+    }
+
 }
