@@ -9,6 +9,7 @@ import pw.mihou.amelia.models.FeedModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class FeedManager {
@@ -27,6 +28,10 @@ public class FeedManager {
             db.find().forEach(doc -> models.add(FeedModel.from(doc)));
             return models;
         }, Scheduler.getExecutorService());
+    }
+
+    public static CompletableFuture<FeedModel> request(long unique) {
+        return CompletableFuture.supplyAsync(() -> FeedModel.from(Objects.requireNonNull(db.find(Filters.eq("unique", unique)).first())));
     }
 
     public static void remove(long unique){

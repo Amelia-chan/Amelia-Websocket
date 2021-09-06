@@ -4,10 +4,15 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import pw.mihou.amelia.connections.AmeliaServer;
+import pw.mihou.amelia.db.FeedManager;
+import pw.mihou.amelia.io.ReadRSS;
 import pw.mihou.amelia.misc.ColorPalette;
+import pw.mihou.amelia.wrappers.ItemWrapper;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Amelia {
 

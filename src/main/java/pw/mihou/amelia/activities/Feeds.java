@@ -31,13 +31,16 @@ public class Feeds {
                             .filter(itemWrapper -> itemWrapper.getPubDate().after(feedModel.getDate()))
                             .collect(Collectors.toUnmodifiableList());
 
-                    AtomicInteger whenToUpdate = new AtomicInteger(0);
-
                     feeds.forEach(itemWrapper -> AmeliaServer.sendPayload(new AmeliaPayload(itemWrapper,
-                            feedModel.setPublishedDate(itemWrapper.getPubDate(), whenToUpdate.incrementAndGet() == feeds.size())),
+                            feedModel.setPublishedDate(itemWrapper.getPubDate(), false)),
                             "feed"));
 
-                    Amelia.log.info("Nodes were notified of a total of {} updates. [feed={}, modelId={}]", feeds.size(), feedModel.getFeedURL(), feedModel.getUnique());
+                    // Update only on the first result (which is guaranteed to be the last update).
+                    feeds.stream().findFirst().ifPresent(itemWrapper -> feedModel.setPublishedDate(itemWrapper.getPubDate(), true));
+
+                    if (feeds.size() > 0) {
+                        Amelia.log.info("Nodes were notified of a total of {} updates. [feed={}, modelId={}]", feeds.size(), feedModel.getFeedURL(), feedModel.getUnique());
+                    }
                 }, bucket.addAndGet(2), TimeUnit.SECONDS))).exceptionally(throwable -> {
             if (throwable != null) {
                 throwable.printStackTrace();
