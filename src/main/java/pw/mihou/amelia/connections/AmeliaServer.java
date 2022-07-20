@@ -103,7 +103,6 @@ public class AmeliaServer {
 
         startHeartbeat();
         startFeeds();
-        startTrending();
     }
 
 }
