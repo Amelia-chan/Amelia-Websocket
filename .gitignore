@@ -2,3 +2,5 @@
 /src/test/
 /.idea/
 /Amelia-Websocket.iml
+build/
+.gradle/
