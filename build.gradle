@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'pw.mihou'
+version = '1.0-SNAPSHOT'
+description = 'Amelia-Websocket'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://jitpack.io')
+    }
+}
+
+application {
+    mainClass = "pw.mihou.amelia.Amelia"
+}
+
+dependencies {
+    implementation 'pw.mihou:amatsuki:4537a90d4f'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'org.json:json:20220320'
+    implementation 'org.mongodb:mongodb-driver-sync:4.6.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
+    implementation 'pw.mihou:rssreader:82abc60ea1'
+    implementation 'ch.qos.logback:logback-classic:1.2.11'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'com.github.luben:zstd-jni:1.5.2-2'
+    implementation 'io.javalin:javalin:4.6.1'
+}
