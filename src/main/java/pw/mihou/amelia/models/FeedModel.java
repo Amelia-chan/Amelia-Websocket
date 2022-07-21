@@ -10,7 +10,7 @@ import java.util.Date;
 public class FeedModel {
 
     private final int id;
-    private final long unique;
+    private final int unique;
     private final String feedURL;
     private final long channel;
     private final String name;
@@ -18,7 +18,7 @@ public class FeedModel {
     private final ArrayList<Long> mentions = new ArrayList<>();
     private Date date;
 
-    public FeedModel(long unique, int id, String feedURL, long channel, long user, String name, Date date, ArrayList<Long> mentions) {
+    public FeedModel(int unique, int id, String feedURL, long channel, long user, String name, Date date, ArrayList<Long> mentions) {
         this.unique = unique;
         this.id = id;
         this.feedURL = feedURL;
@@ -52,7 +52,7 @@ public class FeedModel {
      *
      * @return The unique ID of the model.
      */
-    public long getUnique() {
+    public int getUnique() {
         return unique;
     }
 
@@ -82,7 +82,7 @@ public class FeedModel {
      * @return A new Feed Model.
      */
     public static FeedModel from(Document doc) {
-        return new FeedModel(doc.getLong("unique"),
+        return new FeedModel(doc.getInteger("unique"),
                 doc.getInteger("id"),
                 doc.getString("url"),
                 doc.getLong("channel"),
