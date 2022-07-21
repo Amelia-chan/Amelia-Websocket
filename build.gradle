@@ -23,6 +23,11 @@ application {
     mainClass = "pw.mihou.amelia.Amelia"
 }
 
+task downloadDependencies(type: Copy) {
+    from sourceSets.test.runtimeClasspath
+    into 'runtime/'
+}
+
 dependencies {
     implementation 'pw.mihou:amatsuki:4537a90d4f'
     implementation 'com.google.code.gson:gson:2.9.0'
